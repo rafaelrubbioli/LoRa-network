@@ -6,7 +6,6 @@ nodes = {}
 id_counter = 1
 ip = '0.0.0.0'
 port = 5000
-numberOfconnections = 20
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ipConnections = []
 recievedMessage = []
@@ -23,13 +22,17 @@ class Node:
 
 
 def setup():
+    global ip, port, sock
     print("Inicializando o servidor ...")
     sock.bind((ip, port))
     print("IP: ", ip)
     print("Port: ", port)
     sock.listen(1)
     print("Esperando conexoes ...")
-    # inicializar conexao wifi
+    messageThread = threading.Thread(target = recieveMessage, args = ())
+    messageThread.daemon = True
+    messageThread.start()
+    connect()
 
 def join():
     global id_counter, nodes
@@ -51,6 +54,7 @@ def ping():
     # Enviar mensagem para todos os nodes
 
 def decode(message):
+    global nodes
     mtype = message[0]
     id = message[1]
     seq_num = message[2]
@@ -64,29 +68,38 @@ def decode(message):
             nodes[id].showData(payload)
 
 def handleConnection(c, a):
+    global ipConnections, recievedMessage
     while(True):
         data = c.recv(1024)
         if not data:
             ipConnections.remove(c)
             c.close()
             break
-        recievedMessage.append(data)
-        print(data)
+        else:
+            stringdata = data.decode('utf-8')
+            recievedMessage.append(stringdata)
+            print(stringdata)
         
 
-def main ():
-    global recievedMessage
-    setup()
+def connect():
+    global ipConnections
     while(True):
         # conexao ip
         c, a = sock.accept()
         ipConnections.append(c)
         cThread = threading.Thread(target = handleConnection, args = (c,a))
         cThread.daemon = True
-        recieve = False
-        message = "JOIN| "
+        cThread.start()
+
+
+def recieveMessage():
+    global recievedMessage
+    while(True):
+        # tratamento de mensagem
         if len(recievedMessage) > 0:
+            print("RECEBI MENSAGEM", recievedMessage[0])
             msg = recievedMessage[0]
+            del recievedMessage[0]
             message = msg.split("|")
             if message[0] == "JOIN":
                 join()
@@ -96,6 +109,10 @@ def main ():
 
             if message[0] == "EXIT":
                 exit(int(message[1]), message[3])
+
+
+def main ():
+    setup()
 
 if __name__ == "__main__":
        main()
