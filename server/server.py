@@ -16,8 +16,8 @@ class Node:
         self.id = id
 
     def showData(self, message):
-        tipo = message[3]
-        dado = message[4]
+        tipo = message[0]
+        dado = int(message[1])
         print("Recebido do node ", self.id," : medida de ", message[0], " = ", message[1])
 
 
@@ -37,15 +37,16 @@ def setup():
 def join():
     global id_counter, nodes
     nodes[id_counter] = Node(id_counter)
-    id_counter += 1
     print("Novo node: ", nodes[id_counter].id)
+    id_counter += 1
 
-def exit(id, reason):
-    del id[id]
-    print("Saida da rede de: ", id, " por motivo = ", reason)
+def exit(mid, reason):
+    global nodes
+    del nodes[mid]
+    print("Saida da rede de: ", mid, " por motivo = ", reason)
 
-def askForMeasure(id):
-    message = "ASK|" + id + "|"
+def askForMeasure(mid):
+    message = "ASK|" + mid + "|0|0"
     # enviar mensagem para o node
     return
 
@@ -56,16 +57,16 @@ def ping():
 def decode(message):
     global nodes
     mtype = message[0]
-    id = message[1]
-    seq_num = message[2]
+    mid = int(message[1])
+    seq_num = int(message[2])
     payload = message[3].split(":") 
 
-    if nodes[id]:
-        if seq_num <= nodes[id].sequence_number:
+    if nodes[mid]:
+        if seq_num <= nodes[mid].sequence_number:
             return
         else:
-            nodes[id].sequence_number = seq_num
-            nodes[id].showData(payload)
+            nodes[mid].sequence_number = seq_num
+            nodes[mid].showData(payload)
 
 def handleConnection(c, a):
     global ipConnections, recievedMessage

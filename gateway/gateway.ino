@@ -2,6 +2,14 @@
 #include <LoRa.h>
 #include <Wire.h>  
 #include "SSD1306.h" 
+#include &lt;WiFi.h&gt;
+
+// conexao WiFi
+const char* ssid = "snoopy";
+const char* password = "xupeta01";
+const uint16_t port = 5000;
+const char * host = "192.168.1.83";
+WiFiClient client;
 
 // Pin definetion of WIFI LoRa 32
 // HelTec AutoMation 2017 support@heltec.cn 
@@ -32,6 +40,15 @@ String packet ;
 unsigned int counter = 0;
 
 void loraData(){
+  // send to wifi server
+  if (!client.connect(host, port)) {
+   Serial.println("Connection to host failed");
+   delay(1000);
+    return;
+  }
+  client.print(packet);
+
+  // display on board
   display.clear();
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10);
@@ -54,6 +71,15 @@ void cbk(int packetSize) {
 }
 
 void setup() {
+  // conexao wifi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("conectando ao wifi...");
+  }
+  Serial.print("WiFi conectado com IP: ");
+  Serial.println(WiFi.localIP());
+  
   pinMode(Vext,OUTPUT);
   digitalWrite(Vext, LOW);    // set GPIO16 low to reset OLED
   delay(50); 
@@ -63,7 +89,7 @@ void setup() {
   delay(1500);
   display.clear();
 
-  //inicializa o log na tela
+  //inicializa o log no computador para debug
   Serial.begin(115200);
   
   SPI.begin(SCK,MISO,MOSI,SS);
