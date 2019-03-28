@@ -2,14 +2,13 @@
 #include <LoRa.h>
 #include <Wire.h>  
 #include "SSD1306.h" 
-#include &lt;WiFi.h&gt;
+#include <WiFi.h>
 
 // conexao WiFi
-const char* ssid = "snoopy";
+const char* ssid = "dimba";
 const char* password = "xupeta01";
 const uint16_t port = 5000;
 const char * host = "192.168.1.83";
-WiFiClient client;
 
 // Pin definetion of WIFI LoRa 32
 // HelTec AutoMation 2017 support@heltec.cn 
@@ -25,9 +24,7 @@ WiFiClient client;
 #define LED     25   // GPIO25 -- LED Light pin
 #define BAND    915E6  //you can set band here directly,e.g. 868E6,915E6
 #define PABOOST true
-
 #define V2   1
-
 #ifdef V2 //WIFI Kit series V1 not support Vext control
   #define Vext  21
 #endif
@@ -39,14 +36,27 @@ String packet ;
 
 unsigned int counter = 0;
 
+void displayScreen(String tobedisplayed){
+  // display on board
+  display.clear();
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0 , 15 ,tobedisplayed);
+  display.display();
+}
+  
 void loraData(){
+  Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
+  counter++;
+  
+  WiFiClient client;
   // send to wifi server
   if (!client.connect(host, port)) {
    Serial.println("Connection to host failed");
-   delay(1000);
+   delay(10);
     return;
   }
-  client.print(packet);
+  client.print("JOIN|0|0|0");
 
   // display on board
   display.clear();
@@ -57,9 +67,6 @@ void loraData(){
   display.drawString(0, 37, "Pacote recebido n: " + String(counter));
   display.drawString(0, 0, rssi);  
   display.display();
-
-  Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
-  counter++;
 }
 
 void cbk(int packetSize) {
@@ -71,15 +78,6 @@ void cbk(int packetSize) {
 }
 
 void setup() {
-  // conexao wifi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("conectando ao wifi...");
-  }
-  Serial.print("WiFi conectado com IP: ");
-  Serial.println(WiFi.localIP());
-  
   pinMode(Vext,OUTPUT);
   digitalWrite(Vext, LOW);    // set GPIO16 low to reset OLED
   delay(50); 
@@ -87,24 +85,44 @@ void setup() {
   display.flipScreenVertically();  
   display.setFont(ArialMT_Plain_10);
   delay(1500);
-  display.clear();
+  
+  displayScreen("Inicializando");
 
   //inicializa o log no computador para debug
   Serial.begin(115200);
   
   SPI.begin(SCK,MISO,MOSI,SS);
   LoRa.setPins(SS,RST,DI00);
+
+  // conexao wifi
+  Serial.println("INICIALIZANDO");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(5000);
+    displayScreen("Conectando ao WiFi...");
+    Serial.println("Conectando ao WiFi...");
+  }
+  Serial.print("WiFi conectado com IP: ");
+  Serial.println(WiFi.localIP());
+  
+  WiFiClient client;
+  //NÃO ESTA FUNCIONANDO 
+  while (!client.connect(host, port)) {
+    Serial.println("Conexão falhou");
+    delay(100);
+  }
+  client.print("JOIN|0|0|0");
+  client.stop();
   
   if (!LoRa.begin(BAND,PABOOST)) {
-    display.drawString(0, 0, "Falha incialização lora!");
-    display.display();
+    displayScreen("Falha inicialização loRa!");
     while (1);
   }
   Serial.print("LoRa iniciou com sucesso!");
   Serial.print("Esperando dados... ");
-  display.drawString(0, 0, "LoRa iniciou com sucesso!");
-  display.drawString(0, 10, "Esperando dados...");
-  display.display();
+  displayScreen("LoRa iniciou com sucesso!");
+  delay(2000);
+  displayScreen("Esperando dados...");
   delay(1000);
   //LoRa.onReceive(cbk);
   LoRa.receive();

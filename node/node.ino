@@ -100,7 +100,7 @@ void cbk(int packetSize) {
 
 void join() {
   LoRa.beginPacket();
-  LoRa.print("JOIN REQUEST");
+  LoRa.print("JOIN|0|0|0");
   LoRa.endPacket();
 
   LoRa.receive();
@@ -129,7 +129,7 @@ void loop()
   uint8_t medida = (temprature_sens_read() - 32)/1.8; 
   // send packet
   LoRa.beginPacket();
-  LoRa.print("Pacote - ");
+  LoRa.print("MEASUREMENT|");
   LoRa.print(counter);
   LoRa.print(", medida: ");
   LoRa.print(medida);
