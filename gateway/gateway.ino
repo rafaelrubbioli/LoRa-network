@@ -1,17 +1,9 @@
-#include <SPI.h>
+'#include <SPI.h>
 #include <LoRa.h>
 #include <Wire.h>  
 #include "SSD1306.h" 
 #include <WiFi.h>
-
-// conexao WiFi
-const char* ssid = "dimba";
-const char* password = "xupeta01";
-const uint16_t port = 5000;
-const char * host = "192.168.1.83";
-
 // Pin definetion of WIFI LoRa 32
-// HelTec AutoMation 2017 support@heltec.cn 
 #define SCK     5    // GPIO5  -- SX127x's SCK
 #define SDA     4    // GPIO4  -- SX127x's SDA
 #define SCL     15   // GPIO15 -- SX127X's SCL
@@ -29,15 +21,25 @@ const char * host = "192.168.1.83";
   #define Vext  21
 #endif
 
+// Conexao WiFi
+const char* ssid = "";
+const char* password = "";
+const uint16_t port = 5000;
+const char * host = "192.168.1.83";
+
+// Display
 SSD1306  display(0x3c, SDA, SCL, RST_LED);
+
+// LoRa
 String rssi = "RSSI --";
 String packSize = "--";
-String packet ;
+String packet;
 
+// Protocol
 unsigned int counter = 0;
 
+// display string on board
 void displayScreen(String tobedisplayed){
-  // display on board
   display.clear();
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10);
@@ -45,6 +47,7 @@ void displayScreen(String tobedisplayed){
   display.display();
 }
   
+// Parse lora packet
 void loraData(){
   Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
   counter++;
@@ -52,11 +55,13 @@ void loraData(){
   WiFiClient client;
   // send to wifi server
   if (!client.connect(host, port)) {
-   Serial.println("Connection to host failed");
-   delay(10);
+    Serial.println("Connection to host failed");
+    delay(10);
     return;
   }
-  client.print("JOIN|0|0|0");
+  Serial.println("Repassando o pacote ao servidor...")
+  Serial.prontln()
+  client.print(packet);
 
   // display on board
   display.clear();
@@ -72,8 +77,10 @@ void loraData(){
 void cbk(int packetSize) {
   packet ="";
   packSize = String(packetSize,DEC);
-  for (int i = 0; i < packetSize; i++) { packet += (char) LoRa.read(); }
-  rssi = "RSSI " + String(LoRa.packetRssi(), DEC) ;
+  for (int i = 0; i < packetSize; i++) { 
+    packet += (char) LoRa.read();
+  }
+  rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
   loraData();
 }
 
@@ -109,10 +116,10 @@ void setup() {
   //NÃO ESTA FUNCIONANDO 
   while (!client.connect(host, port)) {
     Serial.println("Conexão falhou");
+    displayScreen("Conexão falhou!")
     delay(100);
   }
   client.print("JOIN|0|0|0");
-  client.stop();
   
   if (!LoRa.begin(BAND,PABOOST)) {
     displayScreen("Falha inicialização loRa!");

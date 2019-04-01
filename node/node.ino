@@ -15,13 +15,10 @@
 #define DI00    26   // GPIO26 -- SX127x's IRQ(Interrupt Request)
 #define BAND    915E6
 #define PABOOST true
-
 #define V2   1
-
 #ifdef V2 //WIFI Kit series V1 not support Vext control
   #define Vext  21
 #endif
-
 // sensor interno de temperatura
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +38,7 @@ uint8_t temprature_sens_read();
 // fim sensor hall
 
 unsigned int counter = 0;
+unsigned int ID = 0;
 bool hasJoined = false;
 unsigned int id = 0;
 
@@ -93,7 +91,9 @@ void loraData(){
 void cbk(int packetSize) {
   packet ="";
   packSize = String(packetSize,DEC);
-  for (int i = 0; i < packetSize; i++) { packet += (char) LoRa.read(); }
+  for (int i = 0; i < packetSize; i++) { 
+    packet += (char) LoRa.read(); 
+  }
   rssi = "RSSI " + String(LoRa.packetRssi(), DEC) ;
   loraData();
 }
@@ -102,10 +102,14 @@ void join() {
   LoRa.beginPacket();
   LoRa.print("JOIN|0|0|0");
   LoRa.endPacket();
-
+  display.clear();
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 0, "Enviando pacote: JOIN");
+  display.display();
   LoRa.receive();
   int packetSize = LoRa.parsePacket();
-  if (packetsize){
+  if (packetSize){
     cbk(packetSize);
   }
   
@@ -117,25 +121,27 @@ void loop()
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10);
 
-  if !hasJoined {
-    join()
-  }
+  if (hasJoined !=  true) {
+    join();
+  } else {
+    display.drawString(0, 0, "Enviando pacote: ");
+    display.drawString(90, 0, String(counter));
+    display.display();
   
-  display.drawString(0, 0, "Enviando pacote: ");
-  display.drawString(90, 0, String(counter));
-  display.display();
-
-  //mede a temperatura
-  uint8_t medida = (temprature_sens_read() - 32)/1.8; 
-  // send packet
-  LoRa.beginPacket();
-  LoRa.print("MEASUREMENT|");
-  LoRa.print(counter);
-  LoRa.print(", medida: ");
-  LoRa.print(medida);
-  LoRa.endPacket();
-
-  counter++;
+    //mede a temperatura
+    uint8_t medida = (temprature_sens_read() - 32)/1.8; 
+    // send packet
+    LoRa.beginPacket();
+    LoRa.print("MEASUREMENT|");
+    LoRa.print(String(ID));
+    LoRa.print("|");
+    LoRa.print(counter);
+    LoRa.print("|TEMP:");
+    LoRa.print(medida);
+    LoRa.endPacket();
+  
+    counter++;
+  }
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
   delay(1000);                       // wait for a second
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
