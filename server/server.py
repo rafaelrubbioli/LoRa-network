@@ -19,6 +19,13 @@ class Node:
         tipo = message[0]
         dado = int(message[1])
         print("Recebido do node ", self.id," : medida de ", message[0], " = ", message[1])
+        self.saveMessage
+
+    def saveMessage(self, message):
+        db = open("dados.txt", "w")
+        db.write(self.id, message[0], message[1])
+        db.close()
+
 
 
 def setup():

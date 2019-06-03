@@ -1,4 +1,4 @@
-'#include <SPI.h>
+#include <SPI.h>
 #include <LoRa.h>
 #include <Wire.h>  
 #include "SSD1306.h" 
@@ -22,10 +22,10 @@
 #endif
 
 // Conexao WiFi
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "Alexa";
+const char* password = "winetiot2303";
 const uint16_t port = 5000;
-const char * host = "192.168.1.83";
+const char * host = "192.168.0.103";
 
 // Display
 SSD1306  display(0x3c, SDA, SCL, RST_LED);
@@ -59,8 +59,8 @@ void loraData(){
     delay(10);
     return;
   }
-  Serial.println("Repassando o pacote ao servidor...")
-  Serial.prontln()
+  Serial.println("Repassando o pacote ao servidor...");
+  Serial.println();
   client.print(packet);
 
   // display on board
@@ -116,7 +116,7 @@ void setup() {
   //NÃO ESTA FUNCIONANDO 
   while (!client.connect(host, port)) {
     Serial.println("Conexão falhou");
-    displayScreen("Conexão falhou!")
+    displayScreen("Conexão falhou!");
     delay(100);
   }
   client.print("JOIN|0|0|0");

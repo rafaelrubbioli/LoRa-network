@@ -123,6 +123,10 @@ void loop()
 
   if (hasJoined !=  true) {
     join();
+    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+	delay(1000);                       // wait for a second
+    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+    delay(1000);
   } else {
     display.drawString(0, 0, "Enviando pacote: ");
     display.drawString(90, 0, String(counter));
@@ -141,9 +145,9 @@ void loop()
     LoRa.endPacket();
   
     counter++;
-  }
-  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
-  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);                       // wait for a second
+	digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+  	delay(900000);                       // wait for a second
+  	digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+  	delay(900000); 					// wait for a second
+  }                      
 }
