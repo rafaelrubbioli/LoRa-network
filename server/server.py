@@ -26,14 +26,20 @@ class Node:
         db.write(self.id, message[0], message[1])
         db.close()
 
+def save(message):
+    db = open("dados.txt", "a")
+    db.write(message)
+    db.close()
+
 def setup():
     global ip, port, sock
     print("Inicializando o servidor ...")
+    save("Inicializando o servidor ...")
     sock.bind((ip, port))
-    print("IP: ", ip)
-    print("Port: ", port)
+    save("IP: "+ ip)
+    save("Port: "+ port)
     sock.listen(1)
-    print("Esperando conexoes ...")
+    save("Esperando conexoes ...")
     messageThread = threading.Thread(target = recieveMessage, args = ())
     messageThread.daemon = True
     messageThread.start()
@@ -43,7 +49,10 @@ def join():
     global id_counter, nodes
     nodes[id_counter] = Node(id_counter)
     print("Novo node: ", nodes[id_counter].id)
+    message = "JOIN|0|0|"+ id_counter
+    sendMessage(message)
     id_counter += 1
+    return
 
 def exit(mid, reason):
     global nodes
@@ -53,11 +62,14 @@ def exit(mid, reason):
 def askForMeasure(mid):
     message = "ASK|" + mid + "|0|0"
     # enviar mensagem para o node
+    sendMessage(message)
     return
 
 def ping():
     message = "PING|0|0|0"
     # Enviar mensagem para todos os nodes
+    sendMessage(message)
+    return 
 
 def decode(message):
     global nodes
@@ -97,6 +109,11 @@ def connect():
         cThread.daemon = True
         cThread.start()
 
+def sendMessage(message):
+    global ipConnections
+    for c in ipConnections:
+        c.print(message)
+    return 
 
 def recieveMessage():
     global recievedMessage

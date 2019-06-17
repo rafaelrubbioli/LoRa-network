@@ -22,8 +22,8 @@
 #endif
 
 // Conexao WiFi
-const char* ssid = "Alexa";
-const char* password = "";
+const char* ssid = "snoopy";
+const char* password = "xupeta01";
 const uint16_t port = 5000;
 const char * host = "192.168.0.103";
 WiFiClient client;
@@ -143,7 +143,8 @@ void loop() {
 
 	delay(10);
 	client.print(packet);
-	if packet.startsWith("JOIN") {
-		response = client.recieve();
+	if (packet == "JOIN|0|0|0") {
+		String response = "";
+    response = client.read();
 	}
 }
