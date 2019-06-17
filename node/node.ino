@@ -47,107 +47,107 @@ String rssi = "RSSI --";
 String packSize = "--";
 String packet ;
 
-void setup()
-{
-  pinMode(Vext,OUTPUT);
-  pinMode(LED,OUTPUT);
-  
-  digitalWrite(Vext, LOW);    // set GPIO16 low to reset OLED
-  delay(50); 
-  display.init();
-  display.flipScreenVertically();  
-  display.setFont(ArialMT_Plain_10);
-  delay(1500);
-  display.clear();
-  
-  SPI.begin(SCK,MISO,MOSI,SS);
-  LoRa.setPins(SS,RST,DI00);
-  
-  if (!LoRa.begin(BAND,PABOOST))
-  {
-    display.drawString(0, 0, "Falha incialização lora!");
-    display.display();
-    while (1);
-  }
-  display.drawString(0, 0, "LoRa iniciou com sucesso!");
-  display.display();
-  delay(1000);
+void setup(){
+	pinMode(Vext,OUTPUT);
+	pinMode(LED,OUTPUT);
+
+	digitalWrite(Vext, LOW);    // set GPIO16 low to reset OLED
+	delay(50); 
+	display.init();
+	display.flipScreenVertically();  
+	display.setFont(ArialMT_Plain_10);
+	delay(1500);
+	display.clear();
+
+	SPI.begin(SCK,MISO,MOSI,SS);
+	LoRa.setPins(SS,RST,DI00);
+
+	if (!LoRa.begin(BAND,PABOOST)){
+		display.drawString(0, 0, "Falha incialização lora!");
+		display.display();
+		while (1);
+	}
+	display.drawString(0, 0, "LoRa iniciou com sucesso!");
+	display.display();
+	delay(1000);
 }
 
 void loraData(){
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
-  display.drawString(0 , 15 ,"Recebi - " + packSize + " bytes");
-  display.drawStringMaxWidth(0 , 26 , 128, packet);
-  display.drawString(0, 37, "Pacote recebido n: " + String(counter));
-  display.drawString(0, 0, rssi);  
-  display.display();
+	display.clear();
+	display.setTextAlignment(TEXT_ALIGN_LEFT);
+	display.setFont(ArialMT_Plain_10);
+	display.drawString(0 , 15 ,"Recebi - " + packSize + " bytes");
+	display.drawStringMaxWidth(0 , 26 , 128, packet);
+	display.drawString(0, 37, "Pacote recebido n: " + String(counter));
+	display.drawString(0, 0, rssi);  
+	display.display();
 
-  Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
-  counter++;
+	Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
+	counter++;
 }
 
 void cbk(int packetSize) {
-  packet ="";
-  packSize = String(packetSize,DEC);
-  for (int i = 0; i < packetSize; i++) { 
-    packet += (char) LoRa.read(); 
-  }
-  rssi = "RSSI " + String(LoRa.packetRssi(), DEC) ;
-  loraData();
+	packet ="";
+	packSize = String(packetSize,DEC);
+	for (int i = 0; i < packetSize; i++) { 
+		packet += (char) LoRa.read(); 
+	}
+	rssi = "RSSI " + String(LoRa.packetRssi(), DEC) ;
+	loraData();
 }
 
 void join() {
-  LoRa.beginPacket();
-  LoRa.print("JOIN|0|0|0");
-  LoRa.endPacket();
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
-  display.drawString(0, 0, "Enviando pacote: JOIN");
-  display.display();
-  LoRa.receive();
-  int packetSize = LoRa.parsePacket();
-  if (packetSize){
-    cbk(packetSize);
-  }
-  
+	LoRa.beginPacket();
+	LoRa.print("JOIN|0|0|0");
+	LoRa.endPacket();
+	display.clear();
+	display.setTextAlignment(TEXT_ALIGN_LEFT);
+	display.setFont(ArialMT_Plain_10);
+	display.drawString(0, 0, "Enviando pacote: JOIN");
+	display.display();
+	LoRa.receive();
+	int packetSize = LoRa.parsePacket();
+	if (packetSize){
+		cbk(packetSize);
+	}
+	hasJoined = true
+	ID = packet
 }
 
-void loop()
-{
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
+void loop(){
+	display.clear();
+	display.setTextAlignment(TEXT_ALIGN_LEFT);
+	display.setFont(ArialMT_Plain_10);
 
-  if (hasJoined !=  true) {
-    join();
-    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-	delay(1000);                       // wait for a second
-    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-    delay(1000);
-  } else {
-    display.drawString(0, 0, "Enviando pacote: ");
-    display.drawString(90, 0, String(counter));
-    display.display();
-  
-    //mede a temperatura
-    uint8_t medida = (temprature_sens_read() - 32)/1.8; 
-    // send packet
-    LoRa.beginPacket();
-    LoRa.print("MEASUREMENT|");
-    LoRa.print(String(ID));
-    LoRa.print("|");
-    LoRa.print(counter);
-    LoRa.print("|TEMP:");
-    LoRa.print(medida);
-    LoRa.endPacket();
-  
-    counter++;
-	digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  	delay(900000);                       // wait for a second
-  	digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  	delay(900000); 					// wait for a second
-  }                      
+	if (hasJoined !=  true) {
+		join();
+		digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+		delay(1000);                       // wait for a second
+		digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+		delay(1000);
+	} 
+	
+	else {
+		display.drawString(0, 0, "Enviando pacote: ");
+		display.drawString(90, 0, String(counter));
+		display.display();
+
+		//mede a temperatura
+		uint8_t medida = (temprature_sens_read() - 32)/1.8; 
+		// send packet
+		LoRa.beginPacket();
+		LoRa.print("MEASUREMENT|");
+		LoRa.print(String(ID));
+		LoRa.print("|");
+		LoRa.print(counter);
+		LoRa.print("|TEMP:");
+		LoRa.print(medida);
+		LoRa.endPacket();
+
+		counter++;
+		digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+		delay(900000);                       // wait for a second
+		digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+		delay(900000); 					// wait for a second
+	}                      
 }

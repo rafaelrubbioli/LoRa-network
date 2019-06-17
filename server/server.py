@@ -22,11 +22,9 @@ class Node:
         self.saveMessage
 
     def saveMessage(self, message):
-        db = open("dados.txt", "w")
+        db = open("dados.txt", "a")
         db.write(self.id, message[0], message[1])
         db.close()
-
-
 
 def setup():
     global ip, port, sock
@@ -95,7 +93,7 @@ def connect():
         # conexao ip
         c, a = sock.accept()
         ipConnections.append(c)
-        cThread = threading.Thread(target = handleConnection, args = (c,a))
+        cThread = threading.Thread(target=handleConnection, arg=(c, a))
         cThread.daemon = True
         cThread.start()
 
