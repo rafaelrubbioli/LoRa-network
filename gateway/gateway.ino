@@ -29,7 +29,7 @@ const char * host = "192.168.0.103";
 WiFiClient client;
 
 // Display
-SSD1306  display(0x3c, SDA, SCL, RST_LED);
+//SSD1306  display(0x3c, SDA, SCL, RST_LED);
 
 // LoRa
 String rssi = "RSSI --";
@@ -40,17 +40,17 @@ String packet;
 unsigned int counter = 0;
 
 // display string on board
-void displayScreen(String tobedisplayed){
-	display.clear();
-	display.setTextAlignment(TEXT_ALIGN_LEFT);
-	display.setFont(ArialMT_Plain_10);
-	display.drawString(0 , 15 ,tobedisplayed);
-	display.display();
-}
+//void displayScreen(String tobedisplayed){
+//	display.clear();
+//	display.setTextAlignment(TEXT_ALIGN_LEFT);
+//	display.setFont(ArialMT_Plain_10);
+//	display.drawString(0 , 15 ,tobedisplayed);
+//	display.display();
+//}
   
 // Parse lora packet
 void loraData(){
-	Serial.print("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
+	Serial.println("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
 	counter++;
 
 	WiFiClient client;
@@ -60,19 +60,9 @@ void loraData(){
 		delay(10);
 		return;
 	}
-	Serial.println("Repassando o pacote ao servidor...");
 	Serial.println();
+  Serial.println("Repassando o pacote ao servidor...");
 	client.print(packet);
-
-	// display on board
-	display.clear();
-	display.setTextAlignment(TEXT_ALIGN_LEFT);
-	display.setFont(ArialMT_Plain_10);
-	display.drawString(0 , 15 ,"Recebi - " + packSize + " bytes");
-	display.drawStringMaxWidth(0 , 26 , 128, packet);
-	display.drawString(0, 37, "Pacote recebido n: " + String(counter));
-	display.drawString(0, 0, rssi);  
-	display.display();
 }
 
 void cbk(int packetSize) {
@@ -88,17 +78,11 @@ void cbk(int packetSize) {
 void setup() {
 	pinMode(Vext,OUTPUT);
 	digitalWrite(Vext, LOW);    // set GPIO16 low to reset OLED
-	delay(50); 
-	display.init();
-	display.flipScreenVertically();  
-	display.setFont(ArialMT_Plain_10);
 	delay(1500);
-
-	displayScreen("Inicializando");
 
 	//inicializa o log no computador para debug
 	Serial.begin(115200);
-
+ 
 	SPI.begin(SCK,MISO,MOSI,SS);
 	LoRa.setPins(SS,RST,DI00);
 
@@ -107,30 +91,24 @@ void setup() {
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(5000);
-		displayScreen("Conectando ao WiFi...");
 		Serial.println("Conectando ao WiFi...");
 	}
 	Serial.print("WiFi conectado com IP: ");
 	Serial.println(WiFi.localIP());
 
-	//NÃO ESTA FUNCIONANDO 
 	while (!client.connect(host, port)) {
 		Serial.println("Conexão falhou");
-		displayScreen("Conexão falhou!");
 		delay(100);
 	}
 
-	if (!LoRa.begin(BAND,PABOOST)) {
-		displayScreen("Falha inicialização loRa!");
+	if (!LoRa.begin(BAND)) {
+		Serial.println("Falha inicialização loRa!");
 		while (1);
 	}
 
 	Serial.print("LoRa iniciou com sucesso!");
 	Serial.print("Esperando dados... ");
-	displayScreen("LoRa iniciou com sucesso!");
-	delay(2000);
-	displayScreen("Esperando dados...");
-	delay(1000);
+	delay(3000);
 	//LoRa.onReceive(cbk);
 	LoRa.receive();
 }
@@ -147,4 +125,5 @@ void loop() {
 		String response = "";
     response = client.read();
 	}
+  
 }
