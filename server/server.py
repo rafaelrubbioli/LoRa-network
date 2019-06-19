@@ -37,7 +37,7 @@ def setup():
     save("Inicializando o servidor ...")
     sock.bind((ip, port))
     save("IP: "+ ip)
-    save("Port: "+ port)
+    save("Port: "+ str(port))
     sock.listen(1)
     save("Esperando conexoes ...")
     messageThread = threading.Thread(target = recieveMessage, args = ())
@@ -49,7 +49,7 @@ def join():
     global id_counter, nodes
     nodes[id_counter] = Node(id_counter)
     print("Novo node: ", nodes[id_counter].id)
-    message = "JOIN|0|0|"+ id_counter
+    message = "JOIN|0|0|"+ str(id_counter)
     sendMessage(message)
     id_counter += 1
     return
@@ -105,14 +105,14 @@ def connect():
         # conexao ip
         c, a = sock.accept()
         ipConnections.append(c)
-        cThread = threading.Thread(target=handleConnection, arg=(c, a))
+        cThread = threading.Thread(target=handleConnection, args=(c, a))
         cThread.daemon = True
         cThread.start()
 
 def sendMessage(message):
     global ipConnections
     for c in ipConnections:
-        c.print(message)
+        c.send(message.encode())
     return 
 
 def recieveMessage():

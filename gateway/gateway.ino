@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <Wire.h>  
-#include "SSD1306.h" 
 #include <WiFi.h>
 
 #define SCK     5    // GPIO5  -- SX127x's SCK
@@ -22,14 +21,11 @@
 #endif
 
 // Conexao WiFi
-const char* ssid = "snoopy";
-const char* password = "xupeta01";
+const char* ssid = "wifi";
+const char* password = "senha";
 const uint16_t port = 5000;
-const char * host = "192.168.0.103";
+const char * host = "150.164.10.115";
 WiFiClient client;
-
-// Display
-//SSD1306  display(0x3c, SDA, SCL, RST_LED);
 
 // LoRa
 String rssi = "RSSI --";
@@ -38,15 +34,6 @@ String packet;
 
 // Protocol
 unsigned int counter = 0;
-
-// display string on board
-//void displayScreen(String tobedisplayed){
-//	display.clear();
-//	display.setTextAlignment(TEXT_ALIGN_LEFT);
-//	display.setFont(ArialMT_Plain_10);
-//	display.drawString(0 , 15 ,tobedisplayed);
-//	display.display();
-//}
   
 // Parse lora packet
 void loraData(){
@@ -61,7 +48,7 @@ void loraData(){
 		return;
 	}
 	Serial.println();
-  Serial.println("Repassando o pacote ao servidor...");
+  	Serial.println("Repassando o pacote ao servidor...");
 	client.print(packet);
 }
 
@@ -82,7 +69,6 @@ void setup() {
 
 	//inicializa o log no computador para debug
 	Serial.begin(115200);
- 
 	SPI.begin(SCK,MISO,MOSI,SS);
 	LoRa.setPins(SS,RST,DI00);
 
@@ -123,7 +109,9 @@ void loop() {
 	client.print(packet);
 	if (packet == "JOIN|0|0|0") {
 		String response = "";
-    response = client.read();
+    		response = client.read();
+		Serial.println(response);
+		LoRa.print(response);
 	}
   
 }
