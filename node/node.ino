@@ -95,9 +95,9 @@ void loop() {
   if (hasJoined !=  true) {
     join();
     digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(1000);                       // wait
+    delay(10000);                       // wait
     digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-    delay(1000);
+    delay(10000);
   }
 
   else {

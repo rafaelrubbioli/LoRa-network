@@ -44,6 +44,7 @@ def setup():
     messageThread.daemon = True
     messageThread.start()
     connect()
+    recieveMessage()
 
 def join():
     global id_counter, nodes
