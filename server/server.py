@@ -28,18 +28,18 @@ class Node:
 
 def save(message):
     db = open("dados.txt", "a")
-    db.write(message)
+    db.write(message + "\n")
     db.close()
 
 def setup():
     global ip, port, sock
     print("Inicializando o servidor ...")
-    save("Inicializando o servidor ...")
+    save("Inicializando o servidor ...\n")
     sock.bind((ip, port))
-    save("IP: "+ ip)
-    save("Port: "+ str(port))
+    save("IP: "+ ip + "\n")
+    save("Port: "+ str(port) + "\n")
     sock.listen(1)
-    save("Esperando conexoes ...")
+    save("Esperando conexoes ...\n")
     messageThread = threading.Thread(target = recieveMessage, args = ())
     messageThread.daemon = True
     messageThread.start()
