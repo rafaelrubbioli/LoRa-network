@@ -64,6 +64,15 @@ void setup() {
   }
   Serial.println("LoRa iniciou com sucesso!");
   delay(1000);
+
+  join();
+  while(hasJoined == false){
+    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(500000);                       // wait
+    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+    delay(50000);
+    join();
+  }
 }
 
 void cbk(int packetSize) {
@@ -83,24 +92,19 @@ void join() {
   LoRa.endPacket();
   Serial.println("Enviando pacote JOIN");
   LoRa.receive();
-  int packetSize = LoRa.parsePacket();
-  if (packetSize) {
-    cbk(packetSize);
-    hasJoined = true;
-    ID = String(packet);
+  Serial.println("Esperando resposta");
+  while(!hasJoined){
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+      cbk(packetSize);
+      hasJoined = true;
+      ID = String(packet[9]);
+      Serial.println("Meu ID designado foi: " + ID);
+    }
   }
 }
 
 void loop() {
-  if (hasJoined !=  true) {
-    join();
-    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(10000);                       // wait
-    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-    delay(10000);
-  }
-
-  else {
     Serial.println("Enviando pacote:" + String(counter));
     //mede a temperatura
     uint8_t medida = (temprature_sens_read() - 32) / 1.8;
@@ -116,8 +120,9 @@ void loop() {
 
     counter++;
     digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(900000);                       // wait for a second
+    //delay(900000);                       // wait for a second
+    delay(1000);
     digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-    delay(900000); 					// wait for a second
-  }
+    delay(1000);
+    //delay(900000); 					// wait for a second
 }

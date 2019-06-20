@@ -50,7 +50,7 @@ def join():
     global id_counter, nodes
     nodes[id_counter] = Node(id_counter)
     print("Novo node: ", nodes[id_counter].id)
-    message = "JOIN|0|0|"+ str(id_counter)
+    message = "JOIN|0|0|" + str(id_counter)
     sendMessage(message)
     id_counter += 1
     return
@@ -60,14 +60,14 @@ def exit(mid, reason):
     del nodes[mid]
     print("Saida da rede de: ", mid, " por motivo = ", reason)
 
-def askForMeasure(mid):
-    message = "ASK|" + mid + "|0|0"
+def askForMeasure(mid, sensor):
+    message = "ASK|" + mid + "|0|" + sensor
     # enviar mensagem para o node
     sendMessage(message)
     return
 
-def ping():
-    message = "PING|0|0|0"
+def ping(sensor):
+    message = "PING|0|0|" + sensor
     # Enviar mensagem para todos os nodes
     sendMessage(message)
     return 
@@ -113,7 +113,7 @@ def connect():
 def sendMessage(message):
     global ipConnections
     for c in ipConnections:
-        c.send(message.encode())
+        c.send(message.encode("utf-8"))
     return 
 
 def recieveMessage():
@@ -134,6 +134,11 @@ def recieveMessage():
             if message[0] == "EXIT":
                 exit(int(message[1]), message[3])
 
+            if message[0] == "PING":
+                ping(message[3])
+
+            if message[0] == "ASK":
+                askForMeasure(message[1], message[3])
 
 def main ():
     setup()

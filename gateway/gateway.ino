@@ -21,10 +21,15 @@
 #endif
 
 // Conexao WiFi
-const char* ssid = "wifi";
-const char* password = "senha";
+//const char* ssid = "Alexa";
+//const char* password = "winetiot2303";
+//const char * host = "150.164.10.115";
+
+const char* ssid = "!!VIRUS!!";
+const char* password = "qwertyuiop";
+const char * host = "192.168.0.27";
 const uint16_t port = 5000;
-const char * host = "150.164.10.115";
+
 WiFiClient client;
 
 // LoRa
@@ -37,9 +42,9 @@ unsigned int counter = 0;
   
 // Parse lora packet
 void loraData(){
-	Serial.println("Recebi " + packSize + "bytes\n"+ packet + " " + counter + "\n");
+	Serial.println("Recebi " + packSize + "bytes \n"+ packet + " " + counter);
 	counter++;
-
+  String newpacket = packet;
 	WiFiClient client;
 	// send to wifi server
 	if (!client.connect(host, port)) {
@@ -47,9 +52,33 @@ void loraData(){
 		delay(10);
 		return;
 	}
-	Serial.println();
-  	Serial.println("Repassando o pacote ao servidor...");
-	client.print(packet);
+  Serial.println("Repassando o pacote ao servidor...");
+	client.print(newpacket);
+ 
+  if (packet == "JOIN|0|0|0") {
+    String s ="";
+    Serial.println("Esperando resposta do servidor para o JOIN");
+    int response;
+    Serial.println("Verificando se servidor esta available");
+    char c = 'a';
+    while(c != 'J'){
+      c = client.read();
+    }
+    Serial.println("Iniciando Leitura");  
+    while (c >= 0 && c <= 127) {
+      s +=c;
+      c = client.read();
+    }  
+    Serial.println("Recebi resposta: " + s);
+    sendLoraPacket(s);
+  }
+}
+
+void sendLoraPacket(String message) {
+    LoRa.beginPacket();
+    Serial.println("Enviando resposta LoRa");
+    LoRa.print(message);
+    LoRa.endPacket();
 }
 
 void cbk(int packetSize) {
@@ -93,7 +122,7 @@ void setup() {
 	}
 
 	Serial.print("LoRa iniciou com sucesso!");
-	Serial.print("Esperando dados... ");
+	Serial.println("Esperando dados... ");
 	delay(3000);
 	//LoRa.onReceive(cbk);
 	LoRa.receive();
@@ -104,14 +133,5 @@ void loop() {
 	if (packetSize) { 
 		cbk(packetSize);  
 	}
-
 	delay(10);
-	client.print(packet);
-	if (packet == "JOIN|0|0|0") {
-		String response = "";
-    		response = client.read();
-		Serial.println(response);
-		LoRa.print(response);
-	}
-  
 }
