@@ -79,7 +79,7 @@ def decode(message):
     seq_num = int(message[2])
     payload = message[3].split(":") 
 
-    if nodes[mid]:
+    if mid in nodes.keys():
         if seq_num <= nodes[mid].sequence_number:
             return
         else:

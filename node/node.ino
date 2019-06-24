@@ -30,11 +30,8 @@ uint8_t temprature_sens_read();
 // fim sensor de temperatura
 
 // sensor hall de campo magnetico
-//    int measurement = 0;
-//    measurement = hallRead();
-//    Serial.print("Hall sensor measurement: ");
-//    Serial.println(measurement);
-// fim sensor hall
+int measurement = 0;
+//fim sensor hall
 
 unsigned int counter = 0;
 String ID = "";
@@ -103,26 +100,30 @@ void join() {
     }
   }
 }
+void wait(int seconds){
+    seconds = seconds/2;
+    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(1000 * seconds);
+    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+    delay(1000 * seconds);
+}
 
 void loop() {
     Serial.println("Enviando pacote:" + String(counter));
     //mede a temperatura
-    uint8_t medida = (temprature_sens_read() - 32) / 1.8;
-    // send packet
-    LoRa.beginPacket();
-    LoRa.print("MEASUREMENT|");
-    LoRa.print(ID);
-    LoRa.print("|");
-    LoRa.print(counter);
-    LoRa.print("|TEMP:");
-    LoRa.print(medida);
-    LoRa.endPacket();
+    uint8_t medida = (temprature_sens_read() -32) / 1.8;
 
+//    //Sensor de temperatura
+//    LoRa.beginPacket();
+//    LoRa.print("MEASUREMENT|" + ID + "|" + counter + "|TEMP:" + medida);
+//    LoRa.endPacket();
+//    counter++;
+//    wait(10);
+    
+    measurement = hallRead();
+    LoRa.beginPacket();
+    LoRa.print("MEASUREMENT|" + ID + "|" + counter + "|HALL:" + measurement);
+    LoRa.endPacket();
     counter++;
-    digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-    //delay(900000);                       // wait for a second
-    delay(1000);
-    digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-    delay(1000);
-    //delay(900000); 					// wait for a second
+    wait(10);
 }
